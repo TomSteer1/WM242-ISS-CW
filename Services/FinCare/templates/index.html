@@ -1,9 +1,18 @@
-<h1>Welcome to Care Connect</h1>
+{% extends "layout.html" %}
+{% block title %}Finances{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+{% block content %}
+<h1>Welcome to Finances</h1>
 
 {% if auth %}
 <h2>You are logged in as a {{ user.username }}</h2>
-<a href='/logout'>Click here to logout</a>
+<a href={{ url_for('logout') }}>Click here to logout</a>
 {% else %}
-<a href='/login'>Click here to login</a>
+<a href={{ url_for('login') }}>Click here to login</a>
 {% endif %}
-
+{% endblock %}

@@ -15,6 +15,8 @@ def generateAuth():
     # Request a token from the SSO server
     request = requests.post(sso_generateToken, data = {'application_name': sso_name, 'application_key': sso_key, 'redirect': sso_redirect}, verify=False)
     print(request.text)
+    if request.status_code != 200 or request.json()['success'] == False: 
+        return False
     token = request.json()['token']
     # Redirect to the SSO server
 
@@ -22,7 +24,7 @@ def generateAuth():
 
 def generateToken(userID,sso_token,expiry=0):
     # Generate random md5 hash
-    token = os.urandom(24)
+    token = os.urandom(24).hex()
     # Insert the token into the database
     conn = sqlite3.connect('database.db')
     # Create user if they don't exist
@@ -80,4 +82,4 @@ def handleCallback():
         session['token'] = generateToken(tokenRequest.json()['user']['id'],tokenRequest.json()['token'],tokenRequest.json()['expiry'])
         return redirect(url_for('index'))
     else:
-        return "Login Failed"
+        return "Login Failed", 401

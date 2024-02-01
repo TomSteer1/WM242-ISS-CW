@@ -7,18 +7,18 @@
   </style>
 {% endblock %}
 {% block content %}
-<form action="{{url_for('login')}}" method="post">
+<form action="{{url_for('register')}}" method="post">
 		<input type="text" name="username" placeholder="Username" />
 		<input type="password" name="password" placeholder="Password" />
 		{% if sso_token %}
 			<input type="hidden" name="sso_token" value="{{ sso_token }}" />
 		{% endif %}
-		<input type="submit" value="Login" />
+		<input type="submit" value="Register" />
 </form>
 {% if sso_token %}
-<a href="{{url_for('register_page')}}?token={{ sso_token }}">Register</a>
+<a href="{{url_for('login_page')}}?token={{ sso_token }}">Login</a>
 {% else %}
-<a href={{url_for('register_page')}}>Register</a>
+<a href={{url_for('login_page')}}>Login</a>
 {% endif %}
 {% endblock %}
 

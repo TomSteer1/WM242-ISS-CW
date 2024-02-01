@@ -37,11 +37,15 @@ def index():
     else:
         return render_template('index.html', auth = True, user = getUser(session.get('token')))
 
-@app.route('/login')
+@app.route('/auth/login')
 def login():
-    return redirect(generateAuth())
+    url = generateAuth()
+    if url == False:
+        return "Something went wrong", 500
+    else:
+        return redirect(url)
 
-@app.route('/logout')
+@app.route('/auth/logout')
 def logout():
     if(validateToken(session.get('token')) == False):
         return redirect(url_for('index'))
@@ -50,7 +54,7 @@ def logout():
         flash('You have successfully logged out', 'success')
         return redirect(url_for('index'))
     else:
-        return "Something went wrong"
+        return "Something went wrong", 500
 
 @app.route('/callback')
 def callback():
