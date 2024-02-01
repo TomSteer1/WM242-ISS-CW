@@ -1,0 +1,9 @@
+<h1>Welcome to Care Connect</h1>
+
+{% if auth %}
+<h2>You are logged in as a {{ user.username }}</h2>
+<a href='/logout'>Click here to logout</a>
+{% else %}
+<a href='/login'>Click here to login</a>
+{% endif %}
+

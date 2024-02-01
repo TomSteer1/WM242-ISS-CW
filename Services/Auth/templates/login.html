@@ -1,0 +1,7 @@
+<form action="/auth/login" method="post">
+		<input type="text" name="username" placeholder="Username" />
+		<input type="password" name="password" placeholder="Password" />
+		<input type="hidden" name="sso_token" value="{{ sso_token }}" />
+		<input type="submit" value="Login" />
+</form>
+<a href="/register?token={{ sso_token }}">Register</a>
