@@ -1,23 +1,29 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session, flash, g, abort
-import sqlite3
+from waitress import serve
 import uuid
 import os
 import time
+from dotenv import load_dotenv
+from sqlcipher3 import dbapi2 as sqlite3
+
+load_dotenv()
 
 app = Flask(__name__)
 
 # Set secret key
-app.secret_key = os.urandom(24)
+app.secret_key = os.environ.get('SECRET_KEY',os.urandom(24))
+PRAGMA = 'PRAGMA key="{}"'.format(os.environ.get('DB_KEY'))
 
 tokenExpirySeconds = 60 * 60
 
 # Connect to database
 conn = sqlite3.connect('database.db')
+conn.execute(PRAGMA)
 print('Connected to database')
 
 # Initialise db 
 # Create uuid function
-conn.execute('CREATE TABLE IF NOT EXISTS users (id uuid primary key not null, username text not null, hash text not null, token text, expiry int, permissions int default 0)')
+conn.execute('CREATE TABLE IF NOT EXISTS users (id uuid primary key not null, username text not null, hash text not null, token text, expiry int, permissions int default 1)')
 print('Table created successfully')
 
 conn.execute('CREATE TABLE IF NOT EXISTS sso (id uuid primary key not null, token text not null, redirect text not null, application_id uuid not null, expiry int not null)')
@@ -28,12 +34,16 @@ print('Table created successfully')
 
 conn.execute('CREATE TABLE IF NOT EXISTS application_tokens (id uuid primary key not null, application_id uuid not null, token text not null, user_id uuid not null, expiry int not null)')
 
+## Insert Default Keys if they don't exist
+conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?)', (str(uuid.uuid4()), 'Records', 'Records'))
+
 # Close connection
 conn.close()
 
 def check_sso_token(token):
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
+    cursor.execute(PRAGMA)
     cursor.execute('SELECT * FROM sso WHERE token=?', (token,))
     result = cursor.fetchone()
     conn.close()
@@ -45,6 +55,7 @@ def check_sso_token(token):
 def get_and_revoke_sso_token(token):
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
+    cursor.execute(PRAGMA)
     cursor.execute('SELECT * FROM sso WHERE token=?', (token,))
     result = cursor.fetchone()
     # Remove token from database
@@ -58,6 +69,7 @@ def get_user(username):
         return None
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
+    cursor.execute(PRAGMA)
     cursor.execute('SELECT * FROM users WHERE username=?', (username,))
     result = cursor.fetchone()
     conn.close()
@@ -71,6 +83,7 @@ def get_user_by_token(token):
         return None
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
+    cursor.execute(PRAGMA)
     cursor.execute('SELECT * FROM users WHERE token=?', (str(token),))
     result = cursor.fetchone()
     conn.close()
@@ -84,6 +97,7 @@ def get_application_token(token):
         return None
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
+    cursor.execute(PRAGMA)
     cursor.execute('SELECT * FROM application_tokens WHERE token=?', (token,))
     result = cursor.fetchone()
     conn.close()
@@ -98,6 +112,7 @@ def hash_password(password):
 def check_app(name, key):
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
+    cursor.execute(PRAGMA)
     cursor.execute('SELECT * FROM applications WHERE name=?', (name,))
     result = cursor.fetchone()
     conn.close()
@@ -137,12 +152,12 @@ def login_page():
                 # sso token is valid
                 # Create application token
                 application_token = os.urandom(24).hex()
+                sso_token = get_and_revoke_sso_token(sso_token)
                 conn = sqlite3.connect('database.db')
+                conn.execute(PRAGMA)
                 conn.execute('INSERT INTO application_tokens (id,application_id, token, user_id,expiry) VALUES (?,?, ?, ?,?)', (str(uuid.uuid4()), sso_token[3], str(application_token), user[0], time.time() + tokenExpirySeconds))
                 conn.commit()
                 conn.close()
-                # Revoke sso token and get redirect url
-                sso_token = get_and_revoke_sso_token(sso_token)
                 return redirect(url_for('redirect_sso', url=sso_token[2] + "?token=" + str(application_token)), code=302)
             else:
                 return 'Invalid token', 400
@@ -168,6 +183,7 @@ def login():
         return 'Invalid username or password', 401
     else:
         conn = sqlite3.connect('database.db')
+        conn.execute(PRAGMA)
         # Create user token
         user_token = os.urandom(24).hex()
         session['auth_token'] = user_token
@@ -210,6 +226,7 @@ def register():
     else:
         # Create user
         conn = sqlite3.connect('database.db')
+        conn.execute(PRAGMA)
         conn.execute('INSERT INTO users (id, username, hash) VALUES (?, ?, ?)', (str(uuid.uuid4()), req_data.get('username'), hash_password(req_data.get('password'))))
         conn.commit()
         conn.close()
@@ -221,6 +238,7 @@ def register():
 def logout():
     if session.get('auth_token') is not None:
         conn = sqlite3.connect('database.db')
+        conn.execute(PRAGMA)
         conn.execute('UPDATE users SET token=?, expiry=? WHERE token=?', (None, None, session.get('auth_token')))
         conn.commit()
         conn.close()
@@ -241,6 +259,7 @@ def generate_sso_token():
         token = str(uuid.uuid4())
         # Insert token into database
         conn = sqlite3.connect('database.db')
+        conn.execute(PRAGMA)
         cursor = conn.cursor()
         cursor.execute('SELECT * FROM applications WHERE name=?', (req_data.get('application_name'),))
         result = cursor.fetchone()
@@ -263,6 +282,7 @@ def validate_sso_token():
         # Check if token is valid
         result = get_application_token(req_data.get('token'))
         conn = sqlite3.connect('database.db')
+        conn.execute(PRAGMA)
         cursor = conn.cursor()
         if result is not None and result[4] > time.time():
             cursor.execute('SELECT * FROM users WHERE id=?', (result[3],))
@@ -275,6 +295,7 @@ def validate_sso_token():
             return jsonify({'valid': False}), 401
     else:
         return jsonify({'valid': False}), 401
+
 
 @app.route('/auth/sso/redirect', methods=['GET'])
 def redirect_sso():
@@ -293,13 +314,14 @@ def logout_sso():
         return jsonify({'success': False,'message': 'Invalid token'}),400
     # Delete token from database
     conn = sqlite3.connect('database.db')
+    conn.execute(PRAGMA)
     conn.execute('DELETE FROM application_tokens WHERE token=?', (req_data.get('token'),))
     conn.commit()
     conn.close()
     return jsonify({'success': True})
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
-
-
-
+    if os.environ.get('DEBUG', False):
+        app.run(debug=True, host='0.0.0.0', port=5000)
+    else:
+        serve(app, host='0.0.0.0', port=5000)

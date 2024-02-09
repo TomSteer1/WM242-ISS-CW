@@ -8,8 +8,26 @@
 {% endblock %}
 {% block content %}
 <h1>Welcome to Care Connect</h1>
-
+<p class="important">
+	Welcome to Care Connect, a website that allows you to connect with other people who are also caring for a loved one.
+</p>
 {% if auth %}
+<h2>View Medical Records</h2>
+<p>
+	Click <a href={{ url_for('main.records') }}>here</a> to view your medical records.
+</p>
+<h2>View GP Information</h2>
+<p>
+	Click <a href={{ url_for('main.gp') }}>here</a> to view your GP information.
+</p>
+<h2>Book an Appointment</h2>
+<p>
+	Click <a href={{ url_for('main.appointment') }}>here</a> to book an appointment with your GP.
+</p>
+<h2>View Prescriptions</h2>
+<p>
+	Click <a href={{ url_for('main.prescriptions') }}>here</a> to view your prescriptions.
+</p>
 <h2>You are logged in as a {{ user.username }}</h2>
 <a href={{ url_for('logout') }}>Click here to logout</a>
 {% else %}

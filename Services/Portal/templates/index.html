@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block title %}Portal{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+{% block content %}
+<h1>Welcome to Meditech</h1>
+<p class="important">
+	Welcome to Meditech, the best place to find the best doctors in the world.
+</p>
+{% if auth %}
+<script>
+	window.location.href = "{{ url_for('main.portal') }}";
+</script>
+{% else %}
+<a href={{ url_for('login') }}>Click here to login</a>
+{% endif %}
+{% endblock %}

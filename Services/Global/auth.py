@@ -2,8 +2,8 @@
 from flask import Flask, request, session, redirect, url_for
 import requests
 import os
-import sqlite3
-from app import sso_name, sso_key, sso_redirect
+from sqlcipher3 import dbapi2 as sqlite3
+from app import sso_name, sso_key, sso_redirect, PRAGMA
 
 # SSO server details
 sso_generateToken = 'https://auth.meditech.com/auth/sso/generateToken'
@@ -28,6 +28,7 @@ def generateToken(userID,sso_token,expiry=0):
     # Insert the token into the database
     conn = sqlite3.connect('database.db')
     # Create user if they don't exist
+    conn.execute(PRAGMA)
     conn.execute('INSERT OR IGNORE INTO users (sso_id) VALUES (?)', (userID,))
     conn.execute('UPDATE users SET user_token = ?, sso_token = ?, expiry = ? WHERE sso_id = ?', (token, sso_token, expiry, userID))
     conn.commit()
@@ -38,6 +39,7 @@ def validateToken(token):
     if token is None:
         return False
     conn = sqlite3.connect('database.db')
+    conn.execute(PRAGMA)
     cursor = conn.execute('SELECT * FROM users WHERE user_token = ?', (token,))
     user = cursor.fetchone()
     conn.close()
@@ -51,6 +53,7 @@ def revokeToken(token):
     if token is None:
         return False
     conn = sqlite3.connect('database.db')
+    conn.execute(PRAGMA)
     cursor = conn.execute('SELECT * FROM users WHERE user_token = ?', (token,))
     user = cursor.fetchone()
     conn.close()
@@ -65,6 +68,7 @@ def getUser(token):
     if token is None:
         return None
     conn = sqlite3.connect('database.db')
+    conn.execute(PRAGMA)
     cursor = conn.execute('SELECT * FROM users WHERE user_token = ?', (token,))
     user = cursor.fetchone()
     conn.close()
@@ -83,3 +87,16 @@ def handleCallback():
         return redirect(url_for('index'))
     else:
         return "Login Failed", 401
+
+def checkPermission(permissionBit):
+    # 1 = User
+    # 2 = All Staff
+    # 4 = Medical Staff
+    # 8  = Finance
+    # 16 = HR
+    # 32 = Admin
+    user = getUser(session['token'])
+    if user is None:
+        return False
+    else:
+        return user['permissions'] & permissionBit == permissionBit

@@ -1,0 +1,109 @@
+version: "3"
+services:
+  proxy:
+    image: haproxy:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./haproxy/certs:/etc/ssl/certs
+    networks:
+      meditech:
+        aliases:
+          - "auth.meditech.com"
+          - "care.meditech.com"
+          - "ficare.meditech.com"
+          - "cloud.meditech.com"
+          - "records.meditech.com"
+          - "prescriptions.meditech.com"
+          - "portal.meditech.com"
+
+    depends_on:
+      - auth
+      - careconnect
+      - finance
+      - cloud
+      - records
+      - prescriptions
+      - portal
+  auth:
+    image: iss/auth:latest
+    build:
+      context: ./Services/Auth
+      dockerfile: Dockerfile
+    volumes:
+      - ./DBs/auth.db:/app/database.db
+    networks:
+      - meditech
+    expose:
+      - "5000"
+  careconnect:
+    image: iss/care:latest
+    build:
+      context: ./Services/CareConnect
+      dockerfile: Dockerfile
+    volumes:
+      - ./DBs/careconnect.db:/app/database.db
+    networks:
+      - meditech
+    expose:
+      - "5000"
+  finance:
+    image: iss/finance:latest
+    build:
+      context: ./Services/FinCare
+      dockerfile: Dockerfile
+    volumes:
+      - ./DBs/finance.db:/app/database.db
+    networks:
+      - meditech
+    expose:
+      - "5000"
+  cloud:
+    image: iss/cloud:latest
+    build:
+      context: ./Services/MediCloud
+      dockerfile: Dockerfile
+    volumes:
+      - ./DBs/cloud.db:/app/database.db
+    networks:
+      - meditech
+    expose:
+      - "5000"
+  records:
+    image: iss/records:latest
+    build:
+      context: ./Services/MedRecords
+      dockerfile: Dockerfile
+    volumes:
+      - ./DBs/records.db:/app/database.db
+    networks:
+      - meditech
+    expose:
+      - "5000"
+  prescriptions:
+    image: iss/prescriptions:latest
+    build:
+      context: ./Services/Prescriptions
+      dockerfile: Dockerfile
+    volumes:
+      - ./DBs/prescriptions.db:/app/database.db
+    networks:
+      - meditech
+    expose:
+      - "5000"
+  portal:
+    image: iss/portal:latest
+    build:
+      context: ./Services/Portal
+      dockerfile: Dockerfile
+    volumes:
+      - ./DBs/portal.db:/app/database.db
+    networks:
+      - meditech
+    expose:
+      - "5000"
+networks:
+  meditech:
+    driver: bridge

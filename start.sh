@@ -1,21 +1,37 @@
 #!/bin/bash
 
-# Kill tmux sessions if they exist
-tmux kill-session -t "auth"
-tmux kill-session -t "care"
-tmux kill-session -t "finance"
-tmux kill-session -t "cloud"
-tmux kill-session -t "records"
-tmux kill-session -t "prescriptions"
+# Check database files and create if not exists
+# Auth 
+if [ ! -f DBs/auth.db ]; then
+		touch DBs/auth.db
+fi
+# CareConnect
+if [ ! -f DBs/careconnect.db ]; then
+		touch DBs/careconnect.db
+fi
+# Finance
+if [ ! -f DBs/finance.db ]; then
+		touch DBs/finance.db
+fi
+# Cloud
+if [ ! -f DBs/cloud.db ]; then
+		touch DBs/cloud.db
+fi
+# Records
+if [ ! -f DBs/records.db ]; then
+		touch DBs/records.db
+fi
+# Portal
+if [ ! -f DBs/portal.db ]; then
+		touch DBs/portal.db
+fi
+# Prescriptions
+if [ ! -f DBs/prescriptions.db ]; then
+		touch DBs/prescriptions.db
+fi
 
-# Change directory to the root of the project
-cd Services
+# Build docker images
+docker-compose build
 
-# Start tmux sessions
-tmux new-session -d -s "auth" -n "Auth" "cd Auth && python app.py"
-tmux new-session -d -s "care" -n "CareConnect" "cd CareConnect && python app.py"
-tmux new-session -d -s "finance" -n "FinCare" "cd FinCare && python app.py"
-tmux new-session -d -s "cloud" -n "MediCloud" "cd MediCloud && python app.py"
-tmux new-session -d -s "records" -n "MedRecords" "cd MedRecords && python app.py"
-tmux new-session -d -s "prescriptions" -n "Prescriptions" "cd Prescriptions && python app.py"
-
+# Start the containers
+docker-compose up

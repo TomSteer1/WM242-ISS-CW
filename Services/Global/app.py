@@ -1,32 +1,39 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
+from waitress import serve
 from dotenv import load_dotenv
 import os
 import requests
-import sqlite3
-
+from sqlcipher3 import dbapi2 as sqlite3
 from auth import *
 
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY',os.urandom(24))
 
-# Load environment variables from .env file
-load_dotenv()
+PRAGMA = 'PRAGMA key="{}"'.format(os.environ.get('DB_KEY'))
+
 
 # SSO Config
 sso_name = os.environ.get('SSO_NAME')
 sso_key = os.environ.get('SSO_KEY')
 sso_redirect = os.environ.get('SSO_REDIRECT')
 
-# Initialize the database
-conn = sqlite3.connect('database.db')
-print("Opened database successfully")
+def init():
+    from main import subapp
+    app.register_blueprint(subapp)
+    
+    # Initialize the database
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute(PRAGMA)
 
-# Create the table if it doesn't exist
-conn.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, sso_id TEXT NOT NULL, user_token TEXT, sso_token TEXT, expiry INT DEFAULT 0)')
-print("Table created successfully")
-
-conn.close()
+    # Create the table if it doesn't exist
+    cursor.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, sso_id TEXT NOT NULL UNIQUE, user_token TEXT, sso_token TEXT, expiry INT DEFAULT 0)')
+    print("Users table created successfully")
+    conn.commit()
+    conn.close()
 
 
 @app.route('/')
@@ -63,5 +70,9 @@ def callback():
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get('APP_PORT', 5000))
-    app.run(debug=True, port=port, host='0.0.0.0')
+    init()
+    if os.environ.get('DEBUG',False) == False:
+        serve(app, port=5000, host='0.0.0.0')
+    else:
+        port = int(os.environ.get('APP_PORT', 5000))
+        app.run(debug=bool(os.environ.get('DEBUG',False)), port=port, host='0.0.0.0')
