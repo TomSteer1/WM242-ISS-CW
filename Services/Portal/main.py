@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, sessions, Blueprint
 from auth import *
-from app import sso_name, sso_key
+from app import sso_name, sso_key, PRAGMA
 from faker import Faker
 subapp = Blueprint('main', __name__)
 
 # Create tables
 conn = sqlite3.connect('database.db')
+conn.execute(PRAGMA)
 cur = conn.cursor()
 cur.execute("CREATE TABLE IF NOT EXISTS records (id INTEGER PRIMARY KEY AUTOINCREMENT, userid TEXT, date DATE, record TEXT)")
 cur.execute("CREATE TABLE IF NOT EXISTS appointments (id INTEGER PRIMARY KEY AUTOINCREMENT, userid TEXT, date DATE, time TIME, doctor TEXT)")

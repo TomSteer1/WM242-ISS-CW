@@ -26,11 +26,10 @@ def init():
     
     # Initialize the database
     conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-    cursor.execute(PRAGMA)
+    conn.execute(PRAGMA)
 
     # Create the table if it doesn't exist
-    cursor.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, sso_id TEXT NOT NULL UNIQUE, user_token TEXT, sso_token TEXT, expiry INT DEFAULT 0)')
+    conn.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, sso_id TEXT NOT NULL UNIQUE, user_token TEXT, sso_token TEXT, expiry INT DEFAULT 0)')
     print("Users table created successfully")
     conn.commit()
     conn.close()
@@ -46,6 +45,7 @@ def index():
 
 @app.route('/auth/login')
 def login():
+    print("Logging in")
     url = generateAuth()
     if url == False:
         return "Something went wrong", 500
@@ -66,8 +66,6 @@ def logout():
 @app.route('/callback')
 def callback():
     return handleCallback()
-
-
 
 if __name__ == '__main__':
     init()

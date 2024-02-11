@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block title %}My GP{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+{% block content %}
+<h1>My GP</h1>
+<p class="important">
+	Welcome to my GP!
+</p>
+<h3>GP Name: {{ gp_name }}</h3>
+<h3>GP Address: {{ gp_address }}</h3>
+<h3>GP Phone: {{ gp_phone }}</h3>
+{% endblock %}

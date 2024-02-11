@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block title %}My Records{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+{% block content %}
+<h1>My Records</h1>
+<p class="important">
+	Welcome to my records page.
+</p>
+<p>
+	Here are my records:
+</p>
+<ul>
+	{% for record in records %}
+	<li>{{ record[2]}} - {{ record[3] }}</li>
+	{% endfor %}
+</ul>
+{% endblock %}

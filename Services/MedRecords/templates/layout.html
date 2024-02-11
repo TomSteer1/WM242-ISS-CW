@@ -8,7 +8,8 @@
   </head>
   <body>
 		<nav>
-			<a href="{{ url_for('index') }}">Home</a>
+			<a href="https://portal.meditech.com">MediPortal</a>
+			<a href={{ url_for('index') }}>Home</a>
 		</nav>
 		{% with messages = get_flashed_messages() %}
   		{% if messages %}

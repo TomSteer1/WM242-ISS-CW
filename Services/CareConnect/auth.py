@@ -4,6 +4,7 @@ import requests
 import os
 from sqlcipher3 import dbapi2 as sqlite3
 from app import sso_name, sso_key, sso_redirect, PRAGMA
+import time
 
 # SSO server details
 sso_generateToken = 'https://auth.meditech.com/auth/sso/generateToken'
@@ -11,8 +12,13 @@ sso_validateToken = 'https://auth.meditech.com/auth/sso/validateToken'
 sso_login = 'https://auth.meditech.com/auth/login'
 sso_logout = 'https://auth.meditech.com/auth/sso/logout'
 
+
+## Cache for permission, caches for 15s
+permissionCache = {}
+
 def generateAuth():
     # Request a token from the SSO server
+    print("Generating token")
     request = requests.post(sso_generateToken, data = {'application_name': sso_name, 'application_key': sso_key, 'redirect': sso_redirect}, verify=False)
     print(request.text)
     if request.status_code != 200 or request.json()['success'] == False: 
@@ -95,7 +101,23 @@ def checkPermission(permissionBit):
     # 8  = Finance
     # 16 = HR
     # 32 = Admin
-    user = getUser(session['token'])
+    user = None 
+    for key in permissionCache:
+        if permissionCache[key]['time'] < time.time():
+            permissionCache.pop(key)
+            break
+        else:
+            print("Cache hit")
+            print(time.time())
+            user = permissionCache[key]['user']
+            break
+    if user is None:
+        user = getUser(session['token'])
+        permissionCache[session['token']] = {'time': time.time() + 15, 'user': user}
+        print("Cache miss")
+        print(time.time())
+
+    print("Checking permission bit " + str(permissionBit) + " for user " + str(user))
     if user is None:
         return False
     else:

@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}My Appointments{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+{% block content %}
+<h1>My Appointments</h1>
+<p class="important">
+	Welcome to my appointments page.
+</p>
+<p>
+	Here are my appointments:
+</p>
+<ul>
+	{% for appointment in appointments %}
+	<li>{{ appointment[2] }} : {{ appointment[3] }} - {{ appointment[4] }} </li>
+	{% endfor %}
+</ul>
+
+<form action="{{ url_for('main.addAppointment') }}" method="post">
+	<p>
+		<label for="date">Date:</label>
+		<input type="date" name="date" id="date">
+	</p>
+	<p>
+		<label for="time">Time:</label>
+		<input type="time" name="time" id="time">
+	</p>
+	<p>
+		<label for="Doctor">Doctor:</label>
+		<select name="doctor" id="doctor">
+			{% for doctor in doctors %}
+			<option value="{{ doctor }}">{{ doctor }}</option>
+			{% endfor %}
+		</select>
+	<p>
+		<input type="submit" value="Add Appointment">
+	</p>
+{% endblock %}

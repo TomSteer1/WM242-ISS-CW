@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, sessions, Blueprint
 from auth import *
-from app import sso_name, sso_key
+from app import sso_name, sso_key, PRAGMA
 from faker import Faker
 subapp = Blueprint('main', __name__)
 
 # Create tables
 conn = sqlite3.connect('database.db')
+conn.execute(PRAGMA)
 cur = conn.cursor()
 cur.execute("CREATE TABLE IF NOT EXISTS records (id INTEGER PRIMARY KEY AUTOINCREMENT, userid TEXT, date DATE, record TEXT)")
 cur.execute("CREATE TABLE IF NOT EXISTS appointments (id INTEGER PRIMARY KEY AUTOINCREMENT, userid TEXT, date DATE, time TIME, doctor TEXT)")
@@ -21,6 +22,7 @@ def records():
         return redirect(url_for('login'))
     if checkPermission(1):
         conn = sqlite3.connect('database.db')
+        conn.execute(PRAGMA)
         cur = conn.cursor()
         cur.execute("SELECT * FROM records WHERE userid = ?", (user['id'],))
         records = cur.fetchall()
@@ -52,6 +54,7 @@ def appointment():
         return redirect(url_for('login'))
     if checkPermission(1):
         conn = sqlite3.connect('database.db')
+        conn.execute(PRAGMA)
         cur = conn.cursor()
         cur.execute("SELECT * FROM appointments WHERE userid = ?", (user['id'],))
         appointments = cur.fetchall()
@@ -89,6 +92,7 @@ def staffAppointments():
         return redirect(url_for('login'))
     if checkPermission(4):
         conn = sqlite3.connect('database.db')
+        conn.execute(PRAGMA)
         cur = conn.cursor()
         cur.execute("SELECT * FROM appointments")
         appointments = cur.fetchall()
@@ -113,6 +117,7 @@ def addAppointment():
         return redirect(url_for('login'))
     if checkPermission(1):
         conn = sqlite3.connect('database.db')
+        conn.execute(PRAGMA)
         cur = conn.cursor()
         cur.execute("INSERT INTO appointments (userid, date, time, doctor) VALUES (?, ?, ?, ?)", (user['id'], request.form['date'], request.form['time'], request.form['doctor']))
         conn.commit()

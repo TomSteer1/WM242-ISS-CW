@@ -29,14 +29,30 @@ print('Table created successfully')
 conn.execute('CREATE TABLE IF NOT EXISTS sso (id uuid primary key not null, token text not null, redirect text not null, application_id uuid not null, expiry int not null)')
 print('Table created successfully')
 
-conn.execute('CREATE TABLE IF NOT EXISTS applications (id uuid primary key not null, name text not null, key text not null)')
+conn.execute('CREATE TABLE IF NOT EXISTS applications (id uuid primary key not null, name text not null, key text not null unique)')
 print('Table created successfully')
 
 conn.execute('CREATE TABLE IF NOT EXISTS application_tokens (id uuid primary key not null, application_id uuid not null, token text not null, user_id uuid not null, expiry int not null)')
 
 ## Insert Default Keys if they don't exist
-conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?)', (str(uuid.uuid4()), 'Records', 'Records'))
-
+# MedRecords
+conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?)', (str(uuid.uuid4()), 'MedRecords', 'MedRecords'))
+# CareConnect
+conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?)', (str(uuid.uuid4()), 'CareConnect', 'CareConnect'))
+# FinCare
+conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?)', (str(uuid.uuid4()), 'FinCare', 'FinCare'))
+# MediCloud
+conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?)', (str(uuid.uuid4()), 'MediCloud', 'MediCloud'))
+# Portal
+conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?)', (str(uuid.uuid4()), 'Portal', 'Portal'))
+# Prescriptions
+conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?)', (str(uuid.uuid4()), 'Prescriptions', 'Prescriptions'))
+conn.execute('UPDATE users SET permissions = 7 WHERE username = "doctor"')
+conn.execute('UPDATE users SET permissions = 11 WHERE username = "finance"')
+conn.execute('UPDATE users SET permissions = 19 WHERE username = "hr"')
+cur = conn.cursor()
+cur.execute('SELECT * FROM applications')
+conn.commit()
 # Close connection
 conn.close()
 
@@ -98,7 +114,7 @@ def get_application_token(token):
     conn = sqlite3.connect('database.db')
     cursor = conn.cursor()
     cursor.execute(PRAGMA)
-    cursor.execute('SELECT * FROM application_tokens WHERE token=?', (token,))
+    cursor.execute('SELECT * FROM application_tokens WHERE token=?', (str(token),))
     result = cursor.fetchone()
     conn.close()
     if result is not None and result[4] > time.time():
@@ -237,9 +253,16 @@ def register():
 @app.route('/auth/logout')
 def logout():
     if session.get('auth_token') is not None:
+        user = get_user_by_token(session.get('auth_token'))
+        if user is None:
+            session.pop('auth_token', None)
+            flash('Logged out successfully')
+            return redirect(url_for('login'))
         conn = sqlite3.connect('database.db')
         conn.execute(PRAGMA)
         conn.execute('UPDATE users SET token=?, expiry=? WHERE token=?', (None, None, session.get('auth_token')))
+        print(user[1])
+        conn.execute('DELETE FROM application_tokens WHERE user_id=?', (str(user[0]),))
         conn.commit()
         conn.close()
         session.pop('auth_token', None)
