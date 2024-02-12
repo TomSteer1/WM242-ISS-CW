@@ -1,5 +1,6 @@
 # Description: Authentication functions for the SSO server
 from flask import Flask, request, session, redirect, url_for
+from functools import wraps
 import requests
 import os
 from sqlcipher3 import dbapi2 as sqlite3
@@ -94,7 +95,7 @@ def handleCallback():
     else:
         return "Login Failed", 401
 
-def checkPermission(permissionBit):
+def checkPermission(permission=1):
     # 1 = User
     # 2 = All Staff
     # 4 = Medical Staff
@@ -102,23 +103,39 @@ def checkPermission(permissionBit):
     # 16 = HR
     # 32 = Admin
     user = None 
-    for key in permissionCache:
-        if permissionCache[key]['time'] < time.time():
-            permissionCache.pop(key)
-            break
-        else:
-            print("Cache hit")
-            print(time.time())
-            user = permissionCache[key]['user']
-            break
+    if 'token' not in session:
+        return False
+    if session['token'] in permissionCache:
+        if permissionCache[session['token']]['time'] > time.time():
+            user = permissionCache[session['token']]['user']
     if user is None:
         user = getUser(session['token'])
+        if user is None:
+            return False
         permissionCache[session['token']] = {'time': time.time() + 15, 'user': user}
         print("Cache miss")
         print(time.time())
 
-    print("Checking permission bit " + str(permissionBit) + " for user " + str(user))
-    if user is None:
-        return False
-    else:
-        return user['permissions'] & permissionBit == permissionBit
+    print("Checking permission bit " + str(permission) + " for user " + str(user))
+    return user['permissions'] & permission == permission
+
+# Decorator for checking if a user is logged in with optional permission parameter
+def authRequired(permission=1):
+    def outer_decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if 'token' not in session:
+                return redirect(url_for('login', next=request.url))
+            ## Use parameter
+            if 'permission' in kwargs:
+                if checkPermission(kwargs['permission']):
+                    return f(*args, **kwargs)
+                else:
+                    return "Permission Denied", 403
+            elif checkPermission(1):
+                return f(*args, **kwargs)
+            else:
+                return "Permission Denied", 403
+        return decorated_function
+    return outer_decorator
+

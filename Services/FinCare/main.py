@@ -6,7 +6,12 @@ subapp = Blueprint('main', __name__)
 conn = sqlite3.connect('database.db')
 print("Opened database successfully")
 
-@subapp.route('/records')
-def records():
-    return "Hello World"
-    return render_template('records.html')
+@subapp.route('/finances')
+def finances():
+    if checkPermission(8):
+        return "Hello World"
+    else:
+        flash("Access Denied","failure")
+        session.pop('token')
+        return redirect(url_for('index'))
+

@@ -28,6 +28,17 @@
 <p>
 	Click <a href={{ url_for('main.prescriptions') }}>here</a> to view your prescriptions.
 </p>
+{% if checkPermission(4) %}
+<h1>Staff Portal</h1>
+<h2>View Records</h2>
+<p>
+	Click <a href={{ url_for('main.staffRecords') }}>here</a> to view all records.
+</p>
+<h2>View Appointments</h2>
+<p>
+	Click <a href={{ url_for('main.staffAppointments') }}>here</a> to view all appointments.
+</p>
+{% endif %}
 <h2>You are logged in as a {{ user.username }}</h2>
 <a href={{ url_for('logout') }}>Click here to logout</a>
 {% else %}

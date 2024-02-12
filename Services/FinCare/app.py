@@ -39,9 +39,14 @@ def init():
 def index():
     # Check if the user is logged in
     if validateToken(session.get('token')) == False:
-        return render_template('index.html', auth = False)
+        return render_template('index.html', auth = False, checkPermission=checkPermission)
     else:
-        return render_template('index.html', auth = True, user = getUser(session.get('token')))
+        if(checkPermission(1)):
+            return render_template('index.html', auth = True, user = getUser(session.get('token')), checkPermission=checkPermission)
+        else:
+            flash("Access Denied")
+            session.pop('token')
+            return render_template('index.html', auth = False, checkPermission=checkPermission)
 
 @app.route('/auth/login')
 def login():

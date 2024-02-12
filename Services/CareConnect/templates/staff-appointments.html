@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block title %}Staff Appointments{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+{% block content %}
+<h1>Staff Appointments</h1>
+<p class="important">
+	Welcome to Staff appointments page.
+</p>
+<p>
+	Here are all appointments:
+</p>
+<ul>
+	{% for appointment in appointments %}
+	<li>{{ appointment[2] }} : {{ appointment[3] }} - {{ appointment[4] }} </li>
+	{% endfor %}
+</ul>
+{% endblock %}
