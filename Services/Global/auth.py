@@ -83,6 +83,7 @@ def getUser(token):
         return None
     else:
         tokenRequest = requests.post(sso_validateToken, data = {'token': user[3], 'application_name': sso_name, 'application_key': sso_key},verify=False)
+        print(tokenRequest.text)
         return tokenRequest.json()['user']
 
 def handleCallback():

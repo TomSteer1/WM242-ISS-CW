@@ -3,6 +3,7 @@ from waitress import serve
 from dotenv import load_dotenv
 import os
 import requests
+import secrets
 from sqlcipher3 import dbapi2 as sqlite3
 from auth import *
 
@@ -10,7 +11,7 @@ from auth import *
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY',os.urandom(24))
+app.secret_key = os.environ.get('SECRET_KEY',secrets.token_hex(32))
 
 PRAGMA = 'PRAGMA key="{}"'.format(os.environ.get('DB_KEY'))
 

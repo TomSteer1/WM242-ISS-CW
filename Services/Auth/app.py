@@ -14,7 +14,7 @@ load_dotenv()
 app = Flask(__name__)
 
 # Set secret key
-app.secret_key = os.environ.get('SECRET_KEY',os.urandom(24))
+app.secret_key = os.environ.get('SECRET_KEY',secrets.token_hex(32))
 PRAGMA = 'PRAGMA key="{}"'.format(os.environ.get('DB_KEY'))
 
 tokenExpirySeconds = 60 * 60
@@ -50,9 +50,9 @@ conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?
 conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?)', (str(uuid.uuid4()), 'Portal', 'Portal'))
 # Prescriptions
 conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?)', (str(uuid.uuid4()), 'Prescriptions', 'Prescriptions'))
-conn.execute('UPDATE users SET permissions = 7 WHERE username = "doctor"')
-conn.execute('UPDATE users SET permissions = 11 WHERE username = "finance"')
-conn.execute('UPDATE users SET permissions = 19 WHERE username = "hr"')
+conn.execute('UPDATE users SET permissions = 9 WHERE username = "doctor"')
+conn.execute('UPDATE users SET permissions = 13 WHERE username = "finance"')
+conn.execute('UPDATE users SET permissions = 21 WHERE username = "hr"')
 cur = conn.cursor()
 cur.execute('SELECT * FROM applications')
 conn.commit()

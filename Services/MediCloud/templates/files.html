@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+{% block title %}MediCloud{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+{% block content %}
+<h1>MediCloud</h1>
+<p>You are logged in as a {{ user.username }}</p>
+<a href={{ url_for('logout') }}>Click here to logout</a>
+<h2>Upload File</h2>
+<form action="/uploadFile" method="post" enctype="multipart/form-data">
+    <label for="filename">File</label>
+    <input type="file" id="file" name="file">
+    <label for="public">Public</label>
+    <input type="checkbox" id="public" name="public" value="False">
+    <input type="submit" value="Upload">
+</form>
+<h2>Your Files</h2>
+<table>
+    <tr>
+        <th>File Name</th>
+        <th>Download</th>
+        <th>Delete</th>
+        <th>Status</th>
+    </tr>
+	{% for file in files %}
+        <tr>
+            <td>{{file[2]}}</td>
+            <td><button onclick="downloadFile('{{file[0]}}')">Download</button></td>
+            <td><button onclick="deleteFile('{{file[0]}}')">Delete</button></td>
+            {% if file[3] %}
+            <td><button onclick="toogleFile('{{file[0]}}')">Make Private</button></td>
+            {% else %}
+            <td><button onclick="toogleFile('{{file[0]}}')">Make Public</button></td>
+            {% endif %}
+        </tr>
+	{% endfor %}
+</table>
+<h2>Public Files</h2>
+<table>
+    <tr>
+        <th>File Name</th>
+        <th>Download</th>
+    </tr>
+	{% for file in publicFiles %}
+        <tr>
+            <td>{{file[2]}}</td>
+            <td><button onclick="downloadFile('{{file[0]}}')">Download</button></td>
+        </tr>
+	{% endfor %}
+</table>
+
+<script>
+    function downloadFile(id) {
+        var link = document.createElement("a")
+        link.setAttribute('download', '');
+        link.href = "/file/" + id;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+    }
+    function deleteFile(id) {
+        fetch("/deleteFile",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/x-www-form-urlencoded"
+            },
+            body:"id=" + id
+        }).then(res => {
+            window.location.reload();
+        })
+    }
+    function toogleFile(id) {
+        fetch("/togglePublic",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/x-www-form-urlencoded"
+            },
+            body:"id=" + id
+        }).then(res => {
+            window.location.reload();
+        })
+    }
+</script>
+
+{% endblock %}

@@ -10,6 +10,9 @@
 <h1>Welcome to MediCloud</h1>
 
 {% if auth %}
+<script>
+  location.href = "/files"  
+</script>
 <h2>You are logged in as a {{ user.username }}</h2>
 <a href={{ url_for('logout') }}>Click here to logout</a>
 {% else %}
