@@ -35,12 +35,12 @@ def addTransactionRoute():
 @subapp.route('/addTransaction', methods=['POST'])
 @authRequired(8)
 def addTransactionRoutePost():
-    if 'date' not in request.form or 'description' not in request.form or 'amount' not in request.form or 'type' not in request.form:
+    if 'date' not in request.form or 'description' not in request.form or 'amount' not in request.form
         flash('Please fill out all fields')
     conn = sqlite3.connect('database.db')
     conn.execute(PRAGMA)
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO transactions (id, date, description, amount, type, user_id) VALUES (?, ?, ?, ?, ?, ?)", (str(uuid.uuid4()), request.form['date'], request.form['description'], request.form['amount'], request.form['type'], session['user_id']))
+    cursor.execute("INSERT INTO transactions (id, date, description, amount) VALUES (?, ?, ?, ?)", (str(uuid.uuid4()), request.form['date'], request.form['description'], request.form['amount']))
     conn.commit()
     conn.close()
     flash('Transaction added successfully')

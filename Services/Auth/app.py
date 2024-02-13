@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template, redirect, url_for, session, flash, g, abort
 from waitress import serve
+from functools import wraps
 import uuid
 import os
 import time
@@ -150,18 +151,61 @@ def check_app(name, key):
     else:
         return False
 
+permissionCache = {}
+def checkPermission(permission=1):
+    # 1 = User
+    # 2 = All Staff
+    # 4 = Medical Staff
+    # 8  = Finance
+    # 16 = HR
+    # 32 = Admin
+    user = None 
+    if 'token' not in session:
+        return False
+    if session['token'] in permissionCache:
+        if permissionCache[session['token']]['time'] > time.time():
+            user = permissionCache[session['token']]['user']
+    if user is None:
+        user = get_user_by_token(session['token'])
+        if user is None:
+            return False
+        user = {'id': user[0], 'username': user[1], 'permissions': user[5]}
+        permissionCache[session['token']] = {'time': time.time() + 15, 'user': user}
+    return user['permissions'] & permission == permission
+
+# Decorator for checking if a user is logged in with optional permission parameter
+def authRequired(permission=1):
+    def outer_decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if session is None or 'token' not in session:
+                return redirect(url_for('login', next=request.url))
+            # Check if token is expired
+            localUser = get_user_by_token(session['token'])
+            if localUser is None or localUser[4] < time.time():
+                return redirect(url_for('login', next=request.url))
+            ## Use parameter
+            if checkPermission(permission):
+                return f(*args, **kwargs)
+            else:
+                flash("Permission Denied")
+                return "Permission Denied", 403
+        return decorated_function
+    return outer_decorator
+
+
 @app.route('/')
 def index():
-    if session.get('auth_token') is None:
+    if session.get('token') is None:
         return render_template('index.html')
     else:
         # Check if token is valid
-        user = get_user_by_token(session.get('auth_token'))
+        user = get_user_by_token(session.get('token'))
         if user is not None:
             user = {'id': user[0], 'username': user[1], 'permissions': user[5]}
-            return render_template('index.html', user=user)
+            return render_template('index.html', user=user, checkPermission=checkPermission)
         else:
-            session.pop('auth_token', None)
+            session.pop('token', None)
             return render_template('index.html')
 
 @app.route('/auth/login')
@@ -170,7 +214,7 @@ def login_page():
     # Check query paramaters for sso login token
     # if token is not present, render login page
     # if token is present, check if token is valid
-    user = get_user_by_token(session.get('auth_token'))
+    user = get_user_by_token(session.get('token'))
     sso_token = request.args.get('token')
     if user is not None:
         # User is already logged in
@@ -215,7 +259,7 @@ def login():
         conn.execute(PRAGMA)
         # Create user token
         user_token = os.urandom(24).hex()
-        session['auth_token'] = user_token
+        session['token'] = user_token
         conn.execute('UPDATE users SET token=?, expiry=? WHERE id=?', (str(user_token), time.time() + tokenExpirySeconds, user[0]))
         conn.commit()
         if req_data.get('sso_token') is None:
@@ -265,19 +309,19 @@ def register():
 
 @app.route('/auth/logout')
 def logout():
-    if session.get('auth_token') is not None:
-        user = get_user_by_token(session.get('auth_token'))
+    if session.get('token') is not None:
+        user = get_user_by_token(session.get('token'))
         if user is None:
-            session.pop('auth_token', None)
+            session.pop('token', None)
             flash('Logged out successfully')
             return redirect(url_for('login'))
         conn = sqlite3.connect('database.db')
         conn.execute(PRAGMA)
-        conn.execute('UPDATE users SET token=?, expiry=? WHERE token=?', (None, None, session.get('auth_token')))
+        conn.execute('UPDATE users SET token=?, expiry=? WHERE token=?', (None, None, session.get('token')))
         conn.execute('DELETE FROM application_tokens WHERE user_id=?', (str(user[0]),))
         conn.commit()
         conn.close()
-        session.pop('auth_token', None)
+        session.pop('token', None)
         flash('Logged out successfully')
     return redirect(url_for('login'))
 
@@ -352,6 +396,75 @@ def logout_sso():
     conn.close()
     return jsonify({'success': True})
 
+@app.route('/admin/applications')
+@authRequired(32)
+def applications():
+    conn = sqlite3.connect('database.db')
+    conn.execute(PRAGMA)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM applications')
+    result = cursor.fetchall()
+    conn.close()
+    user = get_user_by_token(session['token'])
+    user = {'id': user[0], 'username': user[1], 'permissions': user[5]}
+    return render_template('applications.html', applications=result, user=user)
+
+@app.route('/admin/applications/add', methods=['POST'])
+@authRequired(32)
+def add_application():
+    req_data = request.form
+    if req_data.get('name') is None or req_data.get('key') is None:
+        return 'Invalid request', 400
+    conn = sqlite3.connect('database.db')
+    conn.execute(PRAGMA)
+    conn.execute('INSERT INTO applications (id, name, key) VALUES (?, ?, ?)', (str(uuid.uuid4()), req_data.get('name'), req_data.get('key')))
+    conn.commit()
+    conn.close()
+    flash('Application added successfully')
+    return redirect(url_for('applications'))
+
+@app.route('/admin/applications/delete?id=<id>', methods=['GET'])
+@authRequired(32)
+def delete_application(id):
+    if id is None:
+        return 'Invalid request', 400
+    conn = sqlite3.connect('database.db')
+    conn.execute(PRAGMA)
+    conn.execute('DELETE FROM applications WHERE id=?', (id,))
+    conn.commit()
+    conn.close()
+    flash('Application deleted successfully')
+    return redirect(url_for('applications'))
+
+@app.route('/hr/users')
+@authRequired(16)
+def users():
+    conn = sqlite3.connect('database.db')
+    conn.execute(PRAGMA)
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM users')
+    result = cursor.fetchall()
+    conn.close()
+    user = get_user_by_token(session['token'])
+    user = {'id': user[0], 'username': user[1], 'permissions': user[5]}
+    return render_template('users.html', users=result, user=user)
+
+@app.route('/hr/users/modify?id=<id>', methods=['POST'])
+@authRequired(16)
+def modifyUser(id):
+    if id is None or 'permission' not in request.form:
+        return 'Invalid request', 400
+    if checkPermission(int(request.form['permission'])) is False:
+        return 'Permission Denied', 403
+    conn = sqlite3.connect('database.db')
+    conn.execute(PRAGMA)
+    conn.execute('UPDATE users SET permissions=? WHERE id=?', (request.form['permission'], id))
+    conn.commit()
+    conn.close()
+    flash('User modified successfully')
+    return redirect(url_for('users'))
+
+
 ## Set up demo data by checking if initlal file exists and if not create dat
 if not os.path.exists("initial"):
     with open("initial","w") as f:
@@ -368,7 +481,9 @@ if not os.path.exists("initial"):
     # HR 
     conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'hr', hash_password('hr'), 19))
     # Admin
-    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'admin', hash_password('admin'), 63))
+    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'admin', hash_password('admin'), 31))
+    # Superadmin
+    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'superadmin', hash_password('superadmin'), 63))
     conn.commit()
     conn.close()
 

@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block title %}HR - Users{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+{% block content %}
+<h1>Users</h1>
+<h2>You are logged in as {{ user.username }}</h2>
+<h3>Permission Calculator</h3>
+<form id="calculator">
+	<label for="User">User</label>
+	<input type="checkbox" id="User" name="User" value="1"><br>
+	<label for="Staff">Staff</label>
+	<input type="checkbox" id="Staff" name="Staff" value="2"><br>
+	<label for="MedicalStaff">Medical Staff</label>
+	<input type="checkbox" id="MedicalStaff" name="MedicalStaff" value="4"><br>
+	<label for="Finance">Finance</label>
+	<input type="checkbox" id="Finance" name="Finance" value="8"><br>
+	<label for="HR">HR</label>
+	<input type="checkbox" id="HR" name="HR" value="16"><br>
+	<label for="Admin">Admin</label>
+	<input type="checkbox" id="Admin" name="Admin" value="32"><br>
+	<input type="text" id="permission" name="permission" value="0" readonly>
+</form>
+<script>
+	var checkboxes = document.querySelectorAll('input[type=checkbox]');
+	var permission = document.getElementById('permission');
+	checkboxes.forEach(function(checkbox) {
+		checkbox.addEventListener('change', function() {
+			var value = 0;
+			checkboxes.forEach(function(checkbox) {
+				if (checkbox.checked) {
+					value += parseInt(checkbox.value);
+				}
+			});
+			permission.value = value;
+		});
+	});
+</script>
+<table>
+	<tr>
+		<th>Username</th>
+		<th>Permission</th>
+	</tr>
+	{% for user in users %}
+	<tr>
+		<td>{{ user[1] }}</td>
+		<td><form action="{{ url_for('modifyUser', id=user[0]) }}" method="post">
+				<input type="number" name="permission" value="{{ user[5] }}">
+			<input type="submit" value="Modify">
+		</form></td>
+	</tr>
+	{% endfor %}
+</table>
+{% endblock %}

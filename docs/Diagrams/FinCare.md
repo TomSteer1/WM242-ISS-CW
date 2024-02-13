@@ -19,7 +19,7 @@ Client -> FinCare: Requests /listTransactions
 FinCare-> Auth: Check Authentication and Roles (Finance)
 alt Authenticated
 Auth --> FinCare: User
-note over FinCare: Gets all transactions from the database
+FinCare-> FinCare: Gets all transactions from the database
 FinCare --> Client: Transcations page
 else Unauthenticated
 Auth --> FinCare: Unauthorised
@@ -41,9 +41,10 @@ Client -> FinCare: Post request to /addTransaction
 FinCare-> Auth: Check Authentication and Roles (Finance)
 alt Authenticated
 Auth --> FinCare: User
-note over FinCare: Checks the data is valid
+FinCare -> FinCare: Check the data is valid
+note right of FinCare: Needs (Date, Amount, Description)
 alt Valid request
-note over FinCare: Adds transaction to database
+FinCare -> FinCare: Add transaction to database
 FinCare --> Client: Redirect to transaction page
 else Invalid request
 FinCare --> Client: 400
@@ -58,9 +59,10 @@ Client -> FinCare: Post request to /deleteTransaction
 FinCare-> Auth: Check Authentication and Roles (Finance and Admin)
 alt Authenticated
 Auth --> FinCare: User
-note over FinCare: Checks the data is valid
+FinCare -> FinCare: Check the data is valid
+note right of FinCare: Needs a valid ID
 alt Valid request
-note over FinCare: Remove transaction from database
+FinCare -> FinCare: Remove transaction from database
 FinCare --> Client: Redirect to transaction page
 else Invalid request
 FinCare --> Client: 400

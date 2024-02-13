@@ -1,14 +1,14 @@
 actor Client
 
-title Auth
+title SSO
 Client->Web Server: Request Login/Authorised Page
 Web Server->Auth Server: Requests SSO token
 Auth Server--> Web Server: SSO Token
-note left of Web Server: Stores the token
+Web Server -> Web Server: Stores the token
 Web Server--> Client: Redirect to Auth Server with SSO Token
-Client-> Auth Server: Log in
+Client-> Auth Server: Log in (Needs at least user perms)
 alt Valid Credentials
-note right of Auth Server: Generates callback token
+Auth Server -> Auth Server: Generates callback token
 Auth Server --> Client: Redirect to SSO redirect URL
 Client -> Web Server: Pass Token to Web Server
 Web Server -> Auth Server: Validates Token
