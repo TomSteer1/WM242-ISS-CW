@@ -77,6 +77,30 @@ def get_and_revoke_sso_token(token):
     conn.close()
     return result
 
+def get_sso_token(token):
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute(PRAGMA)
+    cursor.execute('SELECT * FROM sso WHERE token=?', (token,))
+    result = cursor.fetchone()
+    conn.close()
+    if result is not None and result[4] > time.time():
+        return result
+    else:
+        return None
+
+def get_sso_app_by_token(token):
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    cursor.execute(PRAGMA)
+    cursor.execute('SELECT * FROM applications JOIN sso ON applications.id = sso.application_id WHERE sso.token=?', (token,))
+    result = cursor.fetchone()
+    conn.close()
+    if result is not None and result[7] > time.time():
+        return result
+    else:
+        return None
+
 def get_user(username):
     if username is None:
         return None
@@ -223,15 +247,8 @@ def login_page():
         else:
             if check_sso_token(sso_token):
                 # sso token is valid
-                # Create application token
-                application_token = os.urandom(24).hex()
-                sso_token = get_and_revoke_sso_token(sso_token)
-                conn = sqlite3.connect('database.db')
-                conn.execute(PRAGMA)
-                conn.execute('INSERT INTO application_tokens (id,application_id, token, user_id,expiry) VALUES (?,?, ?, ?,?)', (str(uuid.uuid4()), sso_token[3], str(application_token), user[0], time.time() + tokenExpirySeconds))
-                conn.commit()
-                conn.close()
-                return redirect(url_for('redirect_sso', url=sso_token[2] + "?token=" + str(application_token)), code=302)
+                # redirect to confirm page
+                return redirect(url_for('confirm_page', token=sso_token))
             else:
                 return 'Invalid token', 400
     else:
@@ -242,6 +259,38 @@ def login_page():
                return render_template('login.html', sso_token=sso_token)
            else:
                return 'Invalid token', 400
+
+@app.route('/auth/confirm')
+def confirm_page():
+    sso_token = request.args.get('token')
+    user = get_user_by_token(session.get('token'))
+    if user is None or sso_token is None:
+        return redirect(url_for('index')), 400
+    app = get_sso_app_by_token(sso_token)
+    if app is None:
+        return redirect(url_for('index')), 400
+    return render_template('confirm.html', sso_token=sso_token, app=app, user=user)
+
+@app.route('/auth/confirm', methods=['POST'])
+def confirm():
+    req_data = request.form
+    if req_data.get('sso_token') is None:
+        return 'Invalid request', 400
+    user = get_user_by_token(session.get('token'))
+    if user is None:
+        return 'Invalid token', 400
+    app = get_sso_app_by_token(req_data.get('sso_token'))
+    if app is None:
+        return 'Invalid token', 400
+    # Create application token
+    application_token = secrets.token_hex(24)
+    conn = sqlite3.connect('database.db')
+    conn.execute(PRAGMA)
+    conn.execute('INSERT INTO application_tokens (id,application_id, token, user_id,expiry) VALUES (?,?, ?, ?,?)', (str(uuid.uuid4()), app[0], application_token, user[0], time.time() + tokenExpirySeconds))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('redirect_sso', url=app[5] + "?token=" + application_token), code=302)
+
 
 @app.route('/auth/login', methods=['POST'])
 def login():

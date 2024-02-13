@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block title %}Prescriptions - List Medicines{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+{% block content %}
+<h1>Medicine List</h1>
+<h2>You are logged in as {{ user.username }}</h2>
+<a href="{{ url_for('logout') }}">Logout</a>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Price</th>
+		{% if admin %}
+		<th>Delete</th>
+		{% endif %}
+	</tr>
+	{% for medicine in medicines %}
+	<tr>
+		<td>{{ medicine[1] }}</td>
+		<td>{{ medicine[2] }}</td>
+		{% if admin %}
+		<td><form action="{{ url_for('main.delete_medicine') }}" method="post">
+			<input type="hidden" name="id" value="{{ medicine[0] }}">
+			<input type="submit" value="Delete">
+			</form>
+		</td>
+		{% endif %}
+	</tr>
+	{% endfor %}
+</table>
+{% if admin %}
+<h2>Add Medicine</h2>
+<form action="{{ url_for('main.add_medicine') }}" method="post">
+	<label for="name">Name:</label>
+	<input type="text" id="name" name="name">
+	<label for="price">Price:</label>
+	<input type="number" id="price" name="price">
+	<input type="submit" value="Add">
+</form>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block title %}Prescriptions - List Patients{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+{% block content %}
+<h1>Patient List</h1>
+<h2>You are logged in as {{ user.username }}</h2>
+<a href="{{ url_for('logout') }}">Logout</a>
+<table>
+	<tr>
+		<th>Name</th>
+		<th>View</th>
+	</tr>
+	{% for patient in patients %}
+	<tr>
+		<td>{{ patient[1] }}</td>
+		<td><a href="{{ url_for('main.view_patient', id=patient[0] ) }}">View</a></td>
+	</tr>
+	{% endfor %}
+</table>
+{% endblock %}

@@ -12,6 +12,11 @@
 {% if auth %}
 <h2>You are logged in as a {{ user.username }}</h2>
 <a href={{ url_for('logout') }}>Click here to logout</a>
+<h2><a href={{ url_for('main.my_prescriptions') }}>Click here to view your prescriptions</a></h2>
+{% if checkPermission(4) %}
+<h2><a href={{ url_for('main.list_patients') }}>Click here to view patients</a></h2>
+<h2><a href={{ url_for('main.list_medicines') }}>Click here to view medication</a></h2>
+{% endif %}
 {% else %}
 <a href={{ url_for('login') }}>Click here to login</a>
 {% endif %}

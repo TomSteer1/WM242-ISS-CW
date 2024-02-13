@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}Confirm Login{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+{% block content %}
+<form action="{{ url_for('confirm') }}" method="post">
+	<h1>You are logging in as {{ user[1] }} to {{ app[2] }}</h1>
+	<h2>Click the button below to confirm</h2>
+	<input type="hidden" name="sso_token" value="{{ sso_token }}">
+	<input type="submit" value="Confirm">
+	<a href="{{ url_for('index') }}">Cancel</a>
+	<a href="{{ url_for('logout') }}">Logout</a>
+</form>
+{% endblock %}
