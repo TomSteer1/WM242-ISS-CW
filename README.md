@@ -6,7 +6,7 @@
 - Run the following commands first
 ```bash
 # Adds the dns records to the host file
-sudo echo "127.0.0.1   auth.meditech.com care.meditech.com fincare.meditech.com cloud.meditech.com records.meditech.com prescriptions.meditech.com portal.meditech.com" >> /etc/hosts
+echo "127.0.0.1   auth.meditech.com care.meditech.com fincare.meditech.com cloud.meditech.com records.meditech.com prescriptions.meditech.com portal.meditech.com" | sudo tee -a /etc/hosts
 ```
 #### Docker Specific
 - Make sure to have docker installed

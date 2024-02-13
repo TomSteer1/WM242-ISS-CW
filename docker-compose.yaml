@@ -67,6 +67,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./DBs/cloud.db:/app/database.db
+      - ./files:/app/uploads
     networks:
       - meditech
     expose:

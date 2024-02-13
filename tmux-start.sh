@@ -13,7 +13,7 @@ tmux kill-session -t "portal"
 docker stop haproxy
 
 # Start tmux sessions
-tmux new-session -d -s "auth" -n "Auth" "source venv/bin/activate && cd Services/Auth &&  DEBUG=TRUE python app.py && sh"
+tmux new-session -d -s "auth" -n "Auth" "source venv/bin/activate && cd Services/Auth &&  DEBUG=TRUE python app.py"
 tmux new-session -d -s "care" -n "CareConnect" "source venv/bin/activate && cd Services/CareConnect &&  DEBUG=TRUE python app.py"
 tmux new-session -d -s "finance" -n "FinCare" "source venv/bin/activate && cd Services/FinCare &&  DEBUG=TRUE python app.py"
 tmux new-session -d -s "cloud" -n "MediCloud" "source venv/bin/activate && cd Services/MediCloud &&  DEBUG=TRUE python app.py"

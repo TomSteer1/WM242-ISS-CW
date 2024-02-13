@@ -30,6 +30,8 @@ if [ ! -f DBs/prescriptions.db ]; then
 		touch DBs/prescriptions.db
 fi
 
+mkdir -p files
+
 # Build docker images
 docker-compose build
 
