@@ -8,7 +8,6 @@ from Crypto.Cipher import AES
 subapp = Blueprint('main', __name__)
 
 conn = sqlite3.connect('database.db')
-print("Opened database successfully")
 conn.execute(PRAGMA)
 conn.execute("CREATE TABLE IF NOT EXISTS files (id uuid PRIMARY KEY, userid TEXT, filename TEXT, public BOOL DEFAULT 0, mimetype TEXT, shared BOOL DEFAULT 0)")
 conn.execute("CREATE TABLE IF NOT EXISTS kms (id uuid PRIMARY KEY, key TEXT NOT NULL, iv TEXT NOT NULL)")

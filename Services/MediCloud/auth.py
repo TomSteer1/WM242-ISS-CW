@@ -19,9 +19,7 @@ permissionCache = {}
 
 def generateAuth():
     # Request a token from the SSO server
-    print("Generating token")
     request = requests.post(sso_generateToken, data = {'application_name': sso_name, 'application_key': sso_key, 'redirect': sso_redirect}, verify=False)
-    print(request.text)
     if request.status_code != 200 or request.json()['success'] == False: 
         return False
     token = request.json()['token']
@@ -130,10 +128,6 @@ def checkPermission(permission=1):
         if user is None:
             return False
         permissionCache[session['token']] = {'time': time.time() + 15, 'user': user}
-        print("Cache miss")
-        print(time.time())
-
-    print("Checking permission bit " + str(permission) + " for user " + str(user))
     return user['permissions'] & permission == permission
 
 # Decorator for checking if a user is logged in with optional permission parameter

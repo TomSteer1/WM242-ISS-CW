@@ -23,7 +23,6 @@ def records():
     cur.execute("SELECT * FROM records WHERE userid = ?", (user['id'],))
     records = cur.fetchall()
     conn.close()
-    print(records)
     return render_template('records.html', records=records)
 
 @subapp.route('/my-gp')

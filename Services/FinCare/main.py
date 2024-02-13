@@ -4,7 +4,6 @@ from app import sso_name, sso_key
 subapp = Blueprint('main', __name__)
 
 conn = sqlite3.connect('database.db')
-print("Opened database successfully")
 
 @subapp.route('/finances')
 def finances():

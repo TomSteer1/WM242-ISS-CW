@@ -31,7 +31,6 @@ def init():
 
     # Create the table if it doesn't exist
     conn.execute('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, sso_id TEXT NOT NULL UNIQUE, user_token TEXT, sso_token TEXT, expiry INT DEFAULT 0)')
-    print("Users table created successfully")
     conn.commit()
     conn.close()
 
@@ -51,7 +50,6 @@ def index():
 
 @app.route('/auth/login')
 def login():
-    print("Logging in")
     url = generateAuth()
     if url == False:
         return "Something went wrong", 500
