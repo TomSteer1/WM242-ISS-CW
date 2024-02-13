@@ -367,6 +367,8 @@ if not os.path.exists("initial"):
     conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'finance', hash_password('finance'), 11))
     # HR 
     conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'hr', hash_password('hr'), 19))
+    # Admin
+    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'admin', hash_password('admin'), 63))
     conn.commit()
     conn.close()
 

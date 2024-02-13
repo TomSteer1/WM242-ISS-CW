@@ -7,7 +7,7 @@ participant Auth
 
 title MediCloud
 Client -> MediCloud: Requests /
-MediCloud-> Auth: Check Authentication and Roles
+MediCloud-> Auth: Check Authentication and Roles (Staff)
 alt Authenticated
 Auth --> MediCloud: User
 MediCloud --> Client: Redirect to /files
@@ -17,7 +17,7 @@ MediCloud --> Client: Home Page
 end
 
 Client-> MediCloud: Requests /files
-MediCloud-> Auth: Check Authentication and Roles
+MediCloud-> Auth: Check Authentication and Roles (Staff)
 alt Authenticated
 Auth --> MediCloud: User
 note over MediCloud: Loads files from database \nSends the user files they have access to
@@ -28,7 +28,7 @@ MediCloud --> Client: Login Page
 end
 
 Client-> MediCloud: Makes Post Request to /uplaodFile
-MediCloud-> Auth: Check Authentication and Roles
+MediCloud-> Auth: Check Authentication and Roles (Staff)
 alt Authenticated
 Auth --> MediCloud: User
 MediCloud -> KMS: Generates a key for the file
@@ -50,7 +50,7 @@ KMS --> MediCloud: Key, IV
 note over MediCloud: Decrypts the file
 MediCloud --> Client: File
 else Private file
-MediCloud-> Auth: Check Authentication and Roles
+MediCloud-> Auth: Check Authentication and Roles (Staff)
 alt Authenticated
 Auth --> MediCloud: User
 note over MediCloud: Checks the permissions of the file for the user
@@ -72,7 +72,7 @@ MediCloud --> Client: 404
 end
 
 Client -> MediCloud: Makes POST Request to /togglePublic or /toggleShared
-MediCloud-> Auth: Check Authentication and Roles
+MediCloud-> Auth: Check Authentication and Roles (Staff)
 alt Authenticated
 Auth --> MediCloud: User
 note over MediCloud: Checks if file exists
@@ -93,7 +93,7 @@ MediCloud --> Client: Login Page
 end
 
 Client -> MediCloud: Makes POST Request to /deleteFile
-MediCloud-> Auth: Check Authentication and Roles
+MediCloud-> Auth: Check Authentication and Roles (Staff)
 alt Authenticated
 Auth --> MediCloud: User
 note over MediCloud: Checks if file exists

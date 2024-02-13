@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% block title %}Finances{% endblock %}
+{% block title %}FinCare{% endblock %}
 {% block head %}
   {{ super() }}
   <style type="text/css">
@@ -7,14 +7,16 @@
   </style>
 {% endblock %}
 {% block content %}
-<h1>Welcome to Finances</h1>
+<h1>Welcome to FinCare</h1>
 
 {% if auth %}
-<script>
-  location.href = "/finances"
-</script>
 <h2>You are logged in as a {{ user.username }}</h2>
 <a href={{ url_for('logout') }}>Click here to logout</a>
+<br>
+{% if checkPermission(8) %}
+<h2><a href="{{url_for('main.listTransactionsRoute')}}">List Transactions</a></h2>
+<h2><a href="{{url_for('main.addTransactionRoute')}}">Add Transaction</a></h2>
+{% endif %}
 {% else %}
 <a href={{ url_for('login') }}>Click here to login</a>
 {% endif %}

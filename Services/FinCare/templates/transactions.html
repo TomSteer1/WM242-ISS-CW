@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block title %}FinCare - Transactions{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+{% block content %}
+<h1>Transactions</h1>
+<h2>You are logged in as a {{ user.username }}</h2>
+<a href={{ url_for('logout') }}>Click here to logout</a>
+<br>
+<h2>Transactions</h2>
+<table>
+	<tr>
+		<th>Transaction ID</th>
+		<th>Amount</th>
+		<th>Description</th>
+		<th>Transaction Date</th>
+		<th>Delete</th>
+	</tr>
+	{% for transaction in transactions %}
+	<tr>
+		<td>{{ transaction[0] }}</td>
+		<td>{{ transaction[3] }}</td>
+		<td>{{ transaction[2] }}</td>
+		<td>{{ transaction[1] }}</td>
+		{% if checkPermission(32) %}
+		<td><form action={{ url_for('main.deleteTransactionRoute', id=transaction[0]) }} method="post">
+			<input type="submit" value="Delete">
+		</form></td>
+		{% else %}
+		<td><form action={{ url_for('main.deleteTransactionRoute', id=transaction[0]) }} method="post">
+			Please contact an admin to delete this transaction
+		{% endif %}
+		<td>
+	</tr>
+	{% endfor %}
+{% endblock %}

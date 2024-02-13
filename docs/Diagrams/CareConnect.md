@@ -6,7 +6,7 @@ participant Auth
     
 title CareConnect
 Client -> CareConnect: Requests /
-CareConnect-> Auth: Check Authentication and Roles
+CareConnect-> Auth: Check Authentication and Roles (User)
 alt Authenticated
 Auth --> CareConnect: User
 CareConnect --> Client: Care Connect Page
@@ -17,7 +17,7 @@ end
 
 
 Client -> CareConnect: Requests /my-records
-CareConnect-> Auth: Check Authentication and Roles
+CareConnect-> Auth: Check Authentication and Roles (User)
 alt Authenticated
 Auth --> CareConnect: User
 activate CareConnect
@@ -30,7 +30,7 @@ CareConnect --> Client: Login Page
 end
 
 Client -> CareConnect: Requests /my-gp
-CareConnect-> Auth: Check Authentication and Roles
+CareConnect-> Auth: Check Authentication and Roles (User)
 alt Authenticated
 Auth --> CareConnect: User
 activate CareConnect
@@ -44,7 +44,7 @@ end
 
 
 Client -> CareConnect: Requests /my-appointments
-CareConnect-> Auth: Check Authentication and Roles
+CareConnect-> Auth: Check Authentication and Roles (User)
 alt Authenticated
 Auth --> CareConnect: User
 activate CareConnect
@@ -57,8 +57,8 @@ CareConnect --> Client: Login Page
 end
 
 
-Client -> CareConnect: POST Request to /my-appointments/add
-CareConnect-> Auth: Check Authentication and Roles
+Client -> CareConnect: POST Request to /my-appointments/add 
+CareConnect-> Auth: Check Authentication and Roles (User)
 alt Authenticated
 Auth --> CareConnect: User
 activate CareConnect
@@ -80,7 +80,7 @@ Client -> CareConnect: Requests /my-prescriptions
 CareConnect --> Client: Redirects to prescriptions server
 
 Client -> CareConnect: Requests /staff-records
-CareConnect-> Auth: Check Authentication and Roles
+CareConnect-> Auth: Check Authentication and Roles (Medical Staff)
 alt Authenticated
 Auth --> CareConnect: User
 activate CareConnect
@@ -93,7 +93,7 @@ CareConnect --> Client: Login Page
 end
 
 Client -> CareConnect: Requests /staff-appointments
-CareConnect-> Auth: Check Authentication and Roles
+CareConnect-> Auth: Check Authentication and Roles (Medical Staff)
 alt Authenticated
 Auth --> CareConnect: User
 activate CareConnect

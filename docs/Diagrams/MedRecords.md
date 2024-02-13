@@ -6,7 +6,7 @@ participant Auth
     
 title MedRecords
 Client -> MedRecords: Requests /
-MedRecords-> Auth: Check Authentication and Roles
+MedRecords-> Auth: Check Authentication and Roles (Medical Staff)
 alt Authenticated
 Auth --> MedRecords: User
 MedRecords --> Client: MedRecords Page
@@ -16,7 +16,7 @@ MedRecords --> Client: Home Page
 end
 
 Client -> MedRecords: Requests /searchPatient?query=<name>
-MedRecords-> Auth: Check Authentication and Roles
+MedRecords-> Auth: Check Authentication and Roles (Medical Staff)
 alt Authenticated
 Auth --> MedRecords: User
 alt Valid request
@@ -31,7 +31,7 @@ MedRecords --> Client: Login Page
 end
 
 Client -> MedRecords: Requests /patient/<id>
-MedRecords-> Auth: Check Authentication and Roles
+MedRecords-> Auth: Check Authentication and Roles (Medical Staff)
 alt Authenticated
 Auth --> MedRecords: User
 alt Valid request
@@ -46,7 +46,7 @@ MedRecords --> Client: Login Page
 end
 
 Client -> MedRecords: Post Request to /createPatient
-MedRecords-> Auth: Check Authentication and Roles
+MedRecords-> Auth: Check Authentication and Roles (Medical Staff)
 alt Authenticated
 Auth --> MedRecords: User
 alt Valid request
@@ -61,7 +61,7 @@ MedRecords --> Client: Login Page
 end
 
 Client -> MedRecords: Post Request to /addRecords
-MedRecords-> Auth: Check Authentication and Roles
+MedRecords-> Auth: Check Authentication and Roles (Medical Staff)
 alt Authenticated
 Auth --> MedRecords: User
 note over MedRecords: Checks the patient exists and the data is valid
@@ -78,7 +78,7 @@ end
 
 
 Client -> MedRecords: Post Request to /deleteRecords
-MedRecords-> Auth: Check Authentication and Roles
+MedRecords-> Auth: Check Authentication and Roles (Medical Staff)
 alt Authenticated
 Auth --> MedRecords: User
 note over MedRecords: Checks the patient exists and the data is valid
@@ -95,7 +95,7 @@ end
 
 
 Client -> MedRecords: Post Request to /deletePatient
-MedRecords-> Auth: Check Authentication and Roles
+MedRecords-> Auth: Check Authentication and Roles (Medical Staff)
 alt Authenticated
 Auth --> MedRecords: User
 note over MedRecords: Checks the patient exists
