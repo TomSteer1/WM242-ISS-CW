@@ -17,12 +17,17 @@
 ## Encryption at Rest (Justification needed)
 ### DB
     - Database is encrypted using SQLCipher
-    - Files 
+    - Files are encrypted using AES Stream based ciphers
+        - Each file has it's own key stored by the kms
 ## Systems
 - MedRecords
 - FinCare
 - CareConnect
+    - Users can log in to view their own records
+    - Medical Staff can login to view all records
 - Prescriptions
 - MediCloud
+    - Users with the role "Staff" can access the file portal
+    - Staff can upload files to the server and then set the file to be accessible to all staff or everyone (for sharing of leaflets for example)
 
 

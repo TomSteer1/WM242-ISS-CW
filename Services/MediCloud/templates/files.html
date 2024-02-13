@@ -15,7 +15,9 @@
     <label for="filename">File</label>
     <input type="file" id="file" name="file">
     <label for="public">Public</label>
-    <input type="checkbox" id="public" name="public" value="False">
+    <input type="checkbox" id="public" name="public">
+    <label for="shared">Add to Staff Share</label>
+    <input type="checkbox" id="shared" name="shared">
     <input type="submit" value="Upload">
 </form>
 <h2>Your Files</h2>
@@ -24,7 +26,9 @@
         <th>File Name</th>
         <th>Download</th>
         <th>Delete</th>
-        <th>Status</th>
+        <th>Public Status</th>
+        <th>Staff Share Status</th>
+        <th>Link</th>
     </tr>
 	{% for file in files %}
         <tr>
@@ -32,10 +36,31 @@
             <td><button onclick="downloadFile('{{file[0]}}')">Download</button></td>
             <td><button onclick="deleteFile('{{file[0]}}')">Delete</button></td>
             {% if file[3] %}
-            <td><button onclick="toogleFile('{{file[0]}}')">Make Private</button></td>
+            <td><button onclick="tooglePublicFile('{{file[0]}}')">Make Private</button></td>
             {% else %}
-            <td><button onclick="toogleFile('{{file[0]}}')">Make Public</button></td>
+            <td><button onclick="tooglePublicFile('{{file[0]}}')">Make Public</button></td>
             {% endif %}
+            {% if file[5] %}
+            <td><button onclick="toogleStaffFile('{{file[0]}}')">Remove From Staff Share</button></td>
+            {% else %}
+            <td><button onclick="toogleStaffFile('{{file[0]}}')">Add To Staff Share</button></td>
+            {% endif %}
+            <td><a href="/file/{{file[0]}}">https://cloud.meditech.com/file/{{file[0]}}</a></td>
+        </tr>
+	{% endfor %}
+</table>
+<h2>Staff Files</h2>
+<table>
+    <tr>
+        <th>File Name</th>
+        <th>Download</th>
+        <th>Link</th>
+    </tr>
+	{% for file in staffFiles %}
+        <tr>
+            <td>{{file[2]}}</td>
+            <td><button onclick="downloadFile('{{file[0]}}')">Download</button></td>
+            <td><a href="/file/{{file[0]}}">https://cloud.meditech.com/file/{{file[0]}}</a></td>
         </tr>
 	{% endfor %}
 </table>
@@ -44,11 +69,13 @@
     <tr>
         <th>File Name</th>
         <th>Download</th>
+        <th>Link</th>
     </tr>
 	{% for file in publicFiles %}
         <tr>
             <td>{{file[2]}}</td>
             <td><button onclick="downloadFile('{{file[0]}}')">Download</button></td>
+            <td><a href="/file/{{file[0]}}">https://cloud.meditech.com/file/{{file[0]}}</a></td>
         </tr>
 	{% endfor %}
 </table>
@@ -73,8 +100,19 @@
             window.location.reload();
         })
     }
-    function toogleFile(id) {
+    function togglePublicFile(id) {
         fetch("/togglePublic",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/x-www-form-urlencoded"
+            },
+            body:"id=" + id
+        }).then(res => {
+            window.location.reload();
+        })
+    }
+    function toogleStaffFile(id) {
+        fetch("/toggleShared",{
             method:"POST",
             headers:{
                 "Content-Type":"application/x-www-form-urlencoded"
