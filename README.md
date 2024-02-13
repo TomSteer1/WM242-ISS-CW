@@ -1,6 +1,15 @@
 # ISS
 
 ## Instructions
+### Credentials
+The app will initially create 4 users (one for each role)
+```
+user:user
+doctor:doctor
+finance:Finance
+hr:hr
+```
+
 
 ### Initial
 - Run the following commands first
