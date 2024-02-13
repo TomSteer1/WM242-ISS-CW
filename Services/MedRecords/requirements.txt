@@ -4,3 +4,4 @@ python-dotenv
 waitress
 faker
 sqlcipher3-binary
+pycryptodome
