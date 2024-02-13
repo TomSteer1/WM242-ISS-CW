@@ -46,9 +46,6 @@ conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?
 conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?)', (str(uuid.uuid4()), 'Portal', 'Portal'))
 # Prescriptions
 conn.execute('INSERT OR IGNORE INTO applications (id, name, key) VALUES (?, ?, ?)', (str(uuid.uuid4()), 'Prescriptions', 'Prescriptions'))
-conn.execute('UPDATE users SET permissions = 9 WHERE username = "doctor"')
-conn.execute('UPDATE users SET permissions = 13 WHERE username = "finance"')
-conn.execute('UPDATE users SET permissions = 21 WHERE username = "hr"')
 cur = conn.cursor()
 cur.execute('SELECT * FROM applications')
 conn.commit()
@@ -354,6 +351,25 @@ def logout_sso():
     conn.commit()
     conn.close()
     return jsonify({'success': True})
+
+## Set up demo data by checking if initlal file exists and if not create dat
+if not os.path.exists("initial"):
+    with open("initial","w") as f:
+        f.write("done")
+   # Creates a user for each role
+    conn = sqlite3.connect('database.db')
+    conn.execute(PRAGMA)
+    # Patient
+    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'patient', hash_password('patient'), 1))
+    # Doctor
+    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'doctor', hash_password('doctor'), 7))
+    # Finance
+    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'finance', hash_password('finance'), 11))
+    # HR 
+    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'hr', hash_password('hr'), 19))
+    conn.commit()
+    conn.close()
+
 
 if __name__ == '__main__':
     if os.environ.get('DEBUG', False):

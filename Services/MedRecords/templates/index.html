@@ -12,6 +12,53 @@
 {% if auth %}
 <h2>You are logged in as a {{ user.username }}</h2>
 <a href={{ url_for('logout') }}>Click here to logout</a>
+<br>
+{% if checkPermission(4) %}
+<h2>Create a new patient</h2>
+<form action="/createPatient" method="post">
+	<label for="name">Patient Name</label>
+	<input type="text" id="patientName" name="name"> <br>
+	<label for="userid">Patient User ID</label>
+	<input type="text" id="patientUserID" name="userid"> <br>
+	<input type="submit" value="Create Patient"> <br>
+</form>
+<h2>Search for a patient</h2>
+<label for="patientSearch">Search for patient</label>
+<input type="text" id="patientSearch" name="patientSearch"> <br>
+<table id="patientsTable">
+  <tr>
+    <th>Patient Name</th>
+    <th>Open</th>
+  </tr>
+  <div id="patients">
+  </div>
+</table>
+<script>
+  lastSearch = ""
+  document.getElementById("patientSearch").addEventListener("keyup", (e) => {
+    search = document.getElementById("patientSearch").value
+    if(search != lastSearch){
+      lastSearch = search
+      fetch("/searchPatient?query=" + search).then(res => res.json()).then(data =>
+      {
+        if(data.error == null)
+        {
+          patientsTable = document.getElementById("patientsTable")
+          patientsTable.innerHTML = ""
+					patientsTable.innerHTML = "<tr><th>Patient Name</th><th>Open</th></tr>"
+          for(patient in data.patients)
+          {
+          	row = document.createElement("tr")  
+						row.innerHTML = "<td>" + data.patients[patient][2] + "</td>"
+						row.innerHTML += "<td><a href='/patient/" + data.patients[patient][0] + "'>Open</a></td>"
+						patientsTable.innerHTML += row.outerHTML
+          }
+        }
+      })
+    }
+  })
+</script>
+{% endif %}
 {% else %}
 <a href={{ url_for('login') }}>Click here to login</a>
 {% endif %}

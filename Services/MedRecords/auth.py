@@ -1,5 +1,5 @@
 # Description: Authentication functions for the SSO server
-from flask import Flask, request, session, redirect, url_for
+from flask import Flask, request, session, redirect, url_for, flash
 from functools import wraps
 import requests
 import os
@@ -135,21 +135,17 @@ def authRequired(permission=1):
     def outer_decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if 'token' not in session:
+            if session is None or 'token' not in session:
                 return redirect(url_for('login', next=request.url))
             # Check if token is expired
-            if getLocalUser(session['token'])[4] < time.time():
+            localUser = getLocalUser(session['token'])
+            if localUser is None or localUser[4] < time.time():
                 return redirect(url_for('login', next=request.url))
             ## Use parameter
-            if 'permission' in kwargs:
-                if checkPermission(kwargs['permission']):
-                    return f(*args, **kwargs)
-                else:
-                    flash("Permission Denied")
-                    return "Permission Denied", 403
-            elif checkPermission(1):
+            if checkPermission(permission):
                 return f(*args, **kwargs)
             else:
+                flash("Permission Denied")
                 return "Permission Denied", 403
         return decorated_function
     return outer_decorator

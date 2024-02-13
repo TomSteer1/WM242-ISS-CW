@@ -3,3 +3,4 @@ __pycache__
 Services/MediCloud/uploads
 *.db
 venv
+initial

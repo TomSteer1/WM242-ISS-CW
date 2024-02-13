@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block title %}Records{% endblock %}
+{% block head %}
+  {{ super() }}
+  <style type="text/css">
+    .important { color: #336699; }
+  </style>
+{% endblock %}
+{% block content %}
+<h1>Welcome to MedRecords</h1>
+<h2>You are logged in as a {{ user.username }}</h2>
+<a href={{ url_for('logout') }}>Click here to logout</a>
+<br>
+<h2>Viewing Patient {{ patient[2] }}</h2>
+<h3>Add Record</h3>
+<form action={{ url_for('main.addRecordRoute', id=patient[0]) }} method="post">
+	<textarea name="record" rows="4" cols="50"></textarea>
+	<input type="submit" value="Add Record">
+</form>
+<h3>Records</h3>
+<table>
+	<th>Record ID</th> 
+	<th>Date</th>
+  <th>Record</th>
+	<th>Delete</th>
+	{% for record in records %}
+		<tr>
+			<td>{{ record[0] }}</td>
+			<td>{{ record[2] }}</td>
+			<td>{{ record[3] }}</td>
+			<td><form action={{ url_for('main.deleteRecordRoute', id=record[0]) }} method="post">
+				<input type="submit" value="Delete">
+		</tr>
+	{% endfor %}
+</table>
+<form action={{ url_for('main.deletePatientRoute', id=patient[0]) }} method="post">
+	<input type="submit" value="Delete Patient">
+{% endblock %}
