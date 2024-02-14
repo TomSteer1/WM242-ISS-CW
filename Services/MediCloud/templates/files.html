@@ -35,14 +35,14 @@
             <td><button onclick="downloadFile('{{file[0]}}')">Download</button></td>
             <td><button onclick="deleteFile('{{file[0]}}')">Delete</button></td>
             {% if file[3] %}
-            <td><button onclick="tooglePublicFile('{{file[0]}}')">Make Private</button></td>
+            <td><button onclick="togglePublicFile('{{file[0]}}')">Make Private</button></td>
             {% else %}
-            <td><button onclick="tooglePublicFile('{{file[0]}}')">Make Public</button></td>
+            <td><button onclick="togglePublicFile('{{file[0]}}')">Make Public</button></td>
             {% endif %}
             {% if file[5] %}
-            <td><button onclick="toogleStaffFile('{{file[0]}}')">Remove From Staff Share</button></td>
+            <td><button onclick="toggleStaffFile('{{file[0]}}')">Remove From Staff Share</button></td>
             {% else %}
-            <td><button onclick="toogleStaffFile('{{file[0]}}')">Add To Staff Share</button></td>
+            <td><button onclick="toggleStaffFile('{{file[0]}}')">Add To Staff Share</button></td>
             {% endif %}
             <td><a href="/file/{{file[0]}}">https://cloud.meditech.com/file/{{file[0]}}</a></td>
         </tr>
@@ -110,7 +110,7 @@
             window.location.reload();
         })
     }
-    function toogleStaffFile(id) {
+    function toggleStaffFile(id) {
         fetch("/toggleShared",{
             method:"POST",
             headers:{

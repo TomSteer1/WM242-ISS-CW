@@ -68,7 +68,13 @@ if not os.path.exists('inital'):
     fake = Faker()
     conn = sqlite3.connect('database.db')
     conn.execute(PRAGMA)
-    for i in range(100):
-        conn.execute("INSERT INTO transactions (id, date, description, amount) VALUES (?, ?, ?, ?)", (str(uuid.uuid4()), fake.date(), fake.company(), fake.random_int(1, 1000)))
-    conn.commit()
-    conn.close()
+    cur = conn.cursor()
+    # Check if table is empty
+    cur.execute("SELECT * FROM transactions")
+    if cur.fetchone() is not None:
+        conn.close()
+    else:
+        for i in range(100):
+            conn.execute("INSERT INTO transactions (id, date, description, amount) VALUES (?, ?, ?, ?)", (str(uuid.uuid4()), fake.date(), fake.company(), fake.random_int(1, 1000)))
+        conn.commit()
+        conn.close()

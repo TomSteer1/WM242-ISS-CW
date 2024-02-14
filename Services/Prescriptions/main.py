@@ -163,9 +163,15 @@ if os.path.exists('initial') is False:
     fake = Faker()
     conn = sqlite3.connect('database.db')
     conn.execute(PRAGMA)
-    conn.execute("INSERT INTO medicines (id, name, price) VALUES (?, ?, ?)", (str(1), "Paracetamol", fake.random_int(1, 100)))
-    conn.execute("INSERT INTO medicines (id, name, price) VALUES (?, ?, ?)", (str(2), "Melatonin", fake.random_int(1, 100)))
-    conn.execute("INSERT INTO medicines (id, name, price) VALUES (?, ?, ?)", (str(3), "Methylphenidate", fake.random_int(1, 100)))
-    conn.commit()
-    conn.close()
+    cur = conn.cursor()
+    # Check if table is empty
+    cur.execute("SELECT * FROM medicines")
+    if cur.fetchone() is not None:
+        conn.close()
+    else:
+        conn.execute("INSERT INTO medicines (id, name, price) VALUES (?, ?, ?)", (str(1), "Paracetamol", fake.random_int(1, 100)))
+        conn.execute("INSERT INTO medicines (id, name, price) VALUES (?, ?, ?)", (str(2), "Melatonin", fake.random_int(1, 100)))
+        conn.execute("INSERT INTO medicines (id, name, price) VALUES (?, ?, ?)", (str(3), "Methylphenidate", fake.random_int(1, 100)))
+        conn.commit()
+        conn.close()
 

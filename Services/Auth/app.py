@@ -514,27 +514,34 @@ def modifyUser(id):
     return redirect(url_for('users'))
 
 
-## Set up demo data by checking if initlal file exists and if not create dat
-if not os.path.exists("initial"):
+## Set up demo data by checking if initlal file exists and if not create data
+if os.path.exists("initial") is False:
     with open("initial","w") as f:
         f.write("done")
    # Creates a user for each role
     conn = sqlite3.connect('database.db')
     conn.execute(PRAGMA)
-    # Patient
-    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'patient', hash_password('patient'), 1))
-    # Doctor
-    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'doctor', hash_password('doctor'), 7))
-    # Finance
-    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'finance', hash_password('finance'), 11))
-    # HR 
-    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'hr', hash_password('hr'), 19))
-    # Admin
-    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'admin', hash_password('admin'), 31))
-    # Superadmin
-    conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'superadmin', hash_password('superadmin'), 63))
-    conn.commit()
-    conn.close()
+    cur = conn.cursor()
+    # Check if users table is empty
+    cur.execute('SELECT * FROM users')
+    result = cur.fetchone()
+    if result is not None:
+        conn.close()
+    else:        
+        # Patient
+        conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'patient', hash_password('patient'), 1))
+        # Doctor
+        conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'doctor', hash_password('doctor'), 7))
+        # Finance
+        conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'finance', hash_password('finance'), 11))
+        # HR 
+        conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'hr', hash_password('hr'), 19))
+        # Admin
+        conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'admin', hash_password('admin'), 31))
+        # Superadmin
+        conn.execute('INSERT INTO users (id, username, hash, permissions) VALUES (?, ?, ?, ?)', (str(uuid.uuid4()), 'superadmin', hash_password('superadmin'), 63))
+        conn.commit()
+        conn.close()
 
 
 if __name__ == '__main__':

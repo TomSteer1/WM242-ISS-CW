@@ -138,7 +138,7 @@ def deleteRecordRoute(id):
     conn.commit()
     conn.close()
     return redirect(url_for("main.openPatient",id=record[1]))
-
+    
 @subapp.route("/deletePatient?id=<id>",methods=["POST"])
 @authRequired(4)
 def deletePatientRoute(id):
@@ -155,13 +155,14 @@ def deletePatientRoute(id):
 if not os.path.exists("initial"):
     with open("initial","w") as f:
         f.write("done")
-    fake = Faker()
-    p1 = addPatient(fake.name(),1)
-    p2 = addPatient(fake.name(),2)
-    p3 = addPatient(fake.name(),3)
-    addRecord(p1,"2020-01-01",fake.text())
-    addRecord(p1,"2020-01-02",fake.text())
-    addRecord(p2,"2020-01-01",fake.text())
-    addRecord(p2,"2020-01-02",fake.text())
-    addRecord(p3,"2020-01-01",fake.text())
-    addRecord(p3,"2020-01-02",fake.text())
+    if getPatient("1") is None:
+        fake = Faker()
+        p1 = addPatient(fake.name(),1)
+        p2 = addPatient(fake.name(),2)
+        p3 = addPatient(fake.name(),3)
+        addRecord(p1,"2020-01-01",fake.text())
+        addRecord(p1,"2020-01-02",fake.text())
+        addRecord(p2,"2020-01-01",fake.text())
+        addRecord(p2,"2020-01-02",fake.text())
+        addRecord(p3,"2020-01-01",fake.text())
+        addRecord(p3,"2020-01-02",fake.text())
