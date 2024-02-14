@@ -9,7 +9,6 @@
 {% block content %}
 <h1>MediCloud</h1>
 <p>You are logged in as a {{ user.username }}</p>
-<a href={{ url_for('logout') }}>Click here to logout</a>
 <h2>Upload File</h2>
 <form action="/uploadFile" method="post" enctype="multipart/form-data">
     <label for="filename">File</label>

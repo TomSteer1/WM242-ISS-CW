@@ -9,7 +9,6 @@
 {% block content %}
 <h1>View Patient</h1>
 <h2>You are logged in as {{ user.username }}</h2>
-<a href="{{ url_for('logout') }}">Logout</a>
 <h2>Patient Information</h2>
 <p><span class="important">Name:</span> {{ patient[1] }}</p>
 <h3>Prescriptions</h3>

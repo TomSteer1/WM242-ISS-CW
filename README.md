@@ -8,6 +8,8 @@ user:user
 doctor:doctor
 finance:Finance
 hr:hr
+admin:admin
+superadmin:superadmin
 ```
 
 
@@ -52,13 +54,24 @@ pip install -r Services/Global/requirements.txt
         - Each file has it's own key stored by the kms
 ### Systems
 - MedRecords
+    - Only accessible to doctors
+    - Doctors can add medical records to patients
 - FinCare
+    - Only accessible to finance team
+    - Team can add purchases
+    - Only admins can remove
 - CareConnect
     - Users can log in to view their own records
     - Medical Staff can login to view all records
 - Prescriptions
+    - Patients can view their prescriptions
+    - Doctors can add/delete prescriptions
+    - Admins can add/delete medicines
 - MediCloud
     - Users with the role "Staff" can access the file portal
     - Staff can upload files to the server and then set the file to be accessible to all staff or everyone (for sharing of leaflets for example)
+- Auth
+    - HR can modify user permissions
+    - Admins can modify application tok
 
 

@@ -2,14 +2,15 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from auth import *
 from app import sso_name, sso_key, PRAGMA
 from faker import Faker
+import uuid
 subapp = Blueprint('main', __name__)
 
 # Create tables
 conn = sqlite3.connect('database.db')
 conn.execute(PRAGMA)
 cur = conn.cursor()
-cur.execute("CREATE TABLE IF NOT EXISTS records (id INTEGER PRIMARY KEY AUTOINCREMENT, userid TEXT, date DATE, record TEXT)")
-cur.execute("CREATE TABLE IF NOT EXISTS appointments (id INTEGER PRIMARY KEY AUTOINCREMENT, userid TEXT, date DATE, time TIME, doctor TEXT)")
+cur.execute("CREATE TABLE IF NOT EXISTS records (id uuid PRIMARY KEY, userid TEXT, date DATE, record TEXT)")
+cur.execute("CREATE TABLE IF NOT EXISTS appointments (id uuid PRIMARY KEY, userid TEXT, date DATE, time TIME, doctor TEXT)")
 conn.commit()
 conn.close()
 
@@ -22,6 +23,14 @@ def records():
     cur = conn.cursor()
     cur.execute("SELECT * FROM records WHERE userid = ?", (user['id'],))
     records = cur.fetchall()
+    ## Add fake records for testing
+    if len(records) is 0:
+        fake = Faker()
+        for i in range(0, 5):
+            cur.execute("INSERT INTO records (id, userid, date, record) VALUES (?,?, ?, ?)", (str(uuid.uuid4()),user['id'], fake.date_this_year(), fake.text()))
+        conn.commit()
+        cur.execute("SELECT * FROM records WHERE userid = ?", (user['id'],))
+        records = cur.fetchall()
     conn.close()
     return render_template('records.html', records=records)
 
@@ -30,7 +39,7 @@ def records():
 def gp():
     fake = Faker()
     user = getUser(session['token'])
-    return render_template('gp.html', gp_name=fake.name(), gp_address=fake.address(), gp_phone=fake.phone_number())
+    return render_template('gp.html', gp_name=fake.name(), gp_address=fake.address(), gp_phone=fake.phone_number(), user=user)
 
 @subapp.route('/my-appointments')
 @authRequired(1)
@@ -81,7 +90,7 @@ def addAppointment():
     conn = sqlite3.connect('database.db')
     conn.execute(PRAGMA)
     cur = conn.cursor()
-    cur.execute("INSERT INTO appointments (userid, date, time, doctor) VALUES (?, ?, ?, ?)", (user['id'], request.form['date'], request.form['time'], request.form['doctor']))
+    cur.execute("INSERT INTO appointments (id,userid, date, time, doctor) VALUES (?,?, ?, ?, ?)", (str(uuid.uuid4()),user['id'], request.form['date'], request.form['time'], request.form['doctor']))
     conn.commit()
     conn.close()
     return redirect(url_for('main.appointment'))

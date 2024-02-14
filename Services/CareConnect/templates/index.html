@@ -12,6 +12,7 @@
 	Welcome to Care Connect, a website that allows you to connect with other people who are also caring for a loved one.
 </p>
 {% if auth %}
+<h2>You are logged in as {{ user.username }}</h2>
 <h2>View Medical Records</h2>
 <p>
 	Click <a href={{ url_for('main.records') }}>here</a> to view your medical records.
@@ -39,8 +40,6 @@
 	Click <a href={{ url_for('main.staffAppointments') }}>here</a> to view all appointments.
 </p>
 {% endif %}
-<h2>You are logged in as a {{ user.username }}</h2>
-<a href={{ url_for('logout') }}>Click here to logout</a>
 {% else %}
 <a href={{ url_for('login') }}>Click here to login</a>
 {% endif %}
