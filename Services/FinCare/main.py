@@ -35,7 +35,7 @@ def addTransactionRoute():
 @subapp.route('/addTransaction', methods=['POST'])
 @authRequired(8)
 def addTransactionRoutePost():
-    if 'date' not in request.form or 'description' not in request.form or 'amount' not in request.form
+    if 'date' not in request.form or 'description' not in request.form or 'amount' not in request.form:
         flash('Please fill out all fields')
     conn = sqlite3.connect('database.db')
     conn.execute(PRAGMA)
