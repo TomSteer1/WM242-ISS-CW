@@ -1,5 +1,4 @@
 #!/bin/bash
-
 mkdir -p DBs
 
 # Check database files and create if not exists
