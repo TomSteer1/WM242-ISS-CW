@@ -93,7 +93,6 @@ def list_medicines():
 @subapp.route('/patient/<id>')
 @authRequired(4) # Doctor
 def view_patient(id):
-    print(getMedicines())
     return render_template('view-patient.html', user=getUser(session['token']), prescriptions=getPatientPrescriptions(id), patient=getPatient(id), medications=getMedicines())  
 
 @subapp.route('/medicine/add', methods=['POST'])
