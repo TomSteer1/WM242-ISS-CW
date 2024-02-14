@@ -503,7 +503,8 @@ def users():
 def modifyUser(id):
     if id is None or 'permission' not in request.form:
         return 'Invalid request', 400
-    if checkPermission(int(request.form['permission'])) is False:
+    user = get_user_by_token(session['token'])
+    if int(user[5]) < int(request.form['permission']) and checkPermission(int(request.form['permission'])) is False:
         return 'Permission Denied', 403
     conn = sqlite3.connect('database.db')
     conn.execute(PRAGMA)
