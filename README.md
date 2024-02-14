@@ -19,10 +19,10 @@ superadmin:superadmin
 # Adds the dns records to the host file
 echo "127.0.0.1   auth.meditech.com care.meditech.com fincare.meditech.com cloud.meditech.com records.meditech.com prescriptions.meditech.com portal.meditech.com" | sudo tee -a /etc/hosts
 ```
-#### Docker Specific
-- Make sure to have docker installed
-- Then run `./start.sh`
-#### Local Specific
+#### Docker Method (simpler)
+- Make sure to have docker and docker-compose installed
+- Then run `./start.sh` (as sudo if not using rootless docker)
+#### Local Method
 - Make sure to have docker and tmux installed
 - Run the following in the root folder before the first launch
 ```bash
@@ -31,9 +31,17 @@ source venv/bin/activate
 pip install -r Services/Global/requirements.txt
 ```
 - Then run `./tmux-start.sh`
+
+#### Troubleshooting
+- Can't connect to the server
+    1. Ensure there are host records in the /etc/hosts file
+    2. Ensure the app is running (Try doing `curl localhost -v`. It should preform a redirect)
+- Can't connect to docker socket
+    1. Run the script as sudo
+
 ## App Requirements
 
-### SSO
+### SSO/Invidivual Auth
     - Uses secrets instead of os.randombytes as secrets is more secure
     - ppbkdf2_sha256
 ### RBAC
