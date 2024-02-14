@@ -2,7 +2,7 @@
 
 ## Instructions
 ### Credentials
-The app will initially create 4 users (one for each role)
+The app will initially create 6 users (one for each role)
 ```
 user:user
 doctor:doctor
